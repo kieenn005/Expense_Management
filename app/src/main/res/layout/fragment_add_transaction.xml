@@ -30,7 +30,7 @@
                     android:background="@drawable/income_selector"
                     android:gravity="center"
                     android:padding="10dp"
-                    android:text="Income"
+                    android:text="@string/app_income"
                     android:textStyle="bold" />
 
                 <TextView
@@ -42,7 +42,7 @@
                     android:background="@drawable/expense_selector"
                     android:gravity="center"
                     android:padding="10dp"
-                    android:text="Expense"
+                    android:text="@string/app_expense"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -58,7 +58,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                    android:hint="Select Date" />
+                    android:hint="@string/app_select_date" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -70,7 +70,7 @@
                     android:id="@+id/amount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Amount"
+                    android:hint="@string/app_amount"
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -85,7 +85,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                    android:hint="Category" />
+                    android:hint="@string/app_category" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -99,7 +99,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                    android:hint="Account" />
+                    android:hint="@string/app_account" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -113,7 +113,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="true"
-                    android:hint="Note" />
+                    android:hint="@string/app_note" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button
@@ -122,7 +122,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:background="#178FEF"
-                android:text="Save" />
+                android:text="@string/app_save" />
         </LinearLayout>
     </ScrollView>
 

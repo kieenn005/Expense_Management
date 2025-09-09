@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".views.fragments.ViewInforFragment">
+    tools:context=".views.fragments.ClickInfor">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -14,6 +14,37 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/incomeBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/income_selector"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:text="@string/app_income"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/expenseBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/expense_selector"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:text="@string/app_expense"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -21,11 +52,11 @@
                 android:layout_weight="1">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/view_info_date"
+                    android:id="@+id/date"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                    android:hint="Select Date" />
+                    android:hint="@string/app_select_date" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -34,11 +65,10 @@
                 android:layout_margin="10dp">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/view_info_amount"
+                    android:id="@+id/amount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:focusable="true"
-                    android:hint="Amount"
+                    android:hint="@string/app_amount"
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -49,11 +79,11 @@
                 android:focusable="false">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/view_info_category"
+                    android:id="@+id/category"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                    android:hint="Category" />
+                    android:hint="@string/app_category" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -63,11 +93,11 @@
                 android:focusable="false">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/view_info_account"
+                    android:id="@+id/account"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                    android:hint="Account" />
+                    android:hint="@string/app_account" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -77,31 +107,28 @@
                 android:focusable="false">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/view_info_note"
+                    android:id="@+id/note"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="true"
-                    android:hint="Note" />
+                    android:hint="@string/app_note" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <LinearLayout
+            <Button
+                android:id="@+id/saveTransactionBtn"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:weightSum="100">
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="#178FEF"
+                android:text="@string/app_save" />
 
-                <Button
-                    android:id="@+id/editTransactionBtn"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:layout_weight="100"
-                    android:background="#178FEF"
-                    android:text="Edit" />
-
-            </LinearLayout>
-
+            <Button
+                android:id="@+id/deleteTransactionBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="#178FEF"
+                android:text="@string/app_delete" />
         </LinearLayout>
     </ScrollView>
 </FrameLayout>

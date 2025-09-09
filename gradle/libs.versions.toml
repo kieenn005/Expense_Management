@@ -10,6 +10,7 @@ constraintlayout = "2.2.0"
 poi = "5.2.3"
 poi-ooxml = "5.2.3"
 poi-ooxml-schemas = "4.1.2"
+mediarouter = "1.7.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -22,6 +23,7 @@ constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayo
 poi = { module = "org.apache.poi:poi", version.ref = "poi" }
 poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "poi-ooxml" }
 poi-ooxml-schemas = { module = "org.apache.poi:poi-ooxml-schemas", version.ref = "poi-ooxml-schemas" }
+mediarouter = { group = "androidx.mediarouter", name = "mediarouter", version.ref = "mediarouter" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

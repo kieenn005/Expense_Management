@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_income">Thu nhập</string>
+    <string name="app_expense">Chi tiêu</string>
+    <string name="app_select_date">Chọn ngày</string>
+    <string name="app_amount">Số tiền</string>
+    <string name="app_category">Danh mục</string>
+    <string name="app_account">Tài khoản</string>
+    <string name="app_note">Ghi chú</string>
+    <string name="app_save">Lưu</string>
+    <string name="app_delete">Xóa</string>
+    <string name="app_name">Quản Lý Chi Tiêu</string>
+    <string name="dark_mode">Chế Độ Tối</string>
+    <string name="language">Ngôn Ngữ</string>
+    <string name="dark_mode_desc">Chuyển đổi giữa giao diện sáng và tối</string>
+    <string name="language_desc">Chọn ngôn ngữ cho ứng dụng</string>
+
+    <string name="app_total">Tổng</string>
+
+    <string name="app_transaction">Giao dịch</string>
+    <string name="app_statistics">Thống kê</string>
+    <string name="app_setting">Cài đặt</string>
+    <string name="app_more">Thêm</string>
+
+    <string name="app_daily">Ngày</string>
+    <string name="app_monthly">Tháng</string>
+    <string name="app_calendar">Chọn ngày</string>
+
+    <string name="app_export_excel">Xuất file Excel</string>
+    <string name="app_import_Excel">Nhập file Excel</string>
+    <string name="app_clear">Xóa dữ liệu</string>
+</resources>

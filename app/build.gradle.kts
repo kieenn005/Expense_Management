@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation("com.github.AnyChart:AnyChart-Android:1.1.5")
+    implementation(libs.mediarouter)
     testImplementation(libs.junit)
     implementation("org.apache.poi:poi:5.2.3")
     implementation("org.apache.poi:poi-ooxml:5.2.3")

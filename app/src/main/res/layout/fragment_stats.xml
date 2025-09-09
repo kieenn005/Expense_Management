@@ -25,7 +25,7 @@
             android:background="@drawable/income_selector"
             android:gravity="center"
             android:padding="10dp"
-            android:text="Income"
+            android:text="@string/app_income"
             android:textStyle="bold" />
 
         <TextView
@@ -37,7 +37,7 @@
             android:background="@drawable/expense_selector"
             android:gravity="center"
             android:padding="10dp"
-            android:text="Expense"
+            android:text="@string/app_expense"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -99,12 +99,12 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Daily" />
+            android:text="@string/app_daily" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Monthly" />
+            android:text="@string/app_monthly" />
 
     </com.google.android.material.tabs.TabLayout>
 

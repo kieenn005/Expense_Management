@@ -1,9 +1,17 @@
 package com.example.spending_management.utils;
 
+import android.content.SharedPreferences;
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 
 import com.example.spending_management.R;
+import com.example.spending_management.models.Account;
 import com.example.spending_management.models.Category;
+import com.example.spending_management.models.Transaction;
+import com.example.spending_management.views.activities.MainActivity;
+import com.example.spending_management.views.fragments.SettingsFragment;
+import com.example.spending_management.views.fragments.TransactionsFragment;
 
 import java.util.ArrayList;
 
@@ -16,13 +24,9 @@ public class Constants {
     public static int DAILY = 0;
     public static int MONTHLY = 1;
     public static int CALENDAR = 2;
-    public static int SUMMARY = 3;
-    public static int NOTES = 4;
-
     public static int SELECTED_TAB = 0;
     public static int SELECTED_TAB_STATS = 0;
     public static String SELECTED_STATS_TYPE = Constants.INCOME;
-
     public static void setCategories() {
         categories = new ArrayList<>();
         categories.add(new Category("Salary", R.drawable.ic_salary, R.color.category1));
@@ -46,7 +50,6 @@ public class Constants {
         switch (accountName){
             case "Bank":
                 return R.color.Bank;
-
             case "Cash":
                 return R.color.Cash;
             case "Pay pal":

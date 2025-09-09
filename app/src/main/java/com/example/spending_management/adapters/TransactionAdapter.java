@@ -19,6 +19,7 @@ import com.example.spending_management.utils.Constants;
 import com.example.spending_management.utils.Helper;
 import com.example.spending_management.views.activities.MainActivity;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import io.realm.RealmResults;
@@ -40,10 +41,6 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public void setOnTransactionClickListener(OnTransactionClickListener listener) {
         this.clickListener = listener;
     }
-    public void setOnTransactionLongClickListener(OnTransactionLongClickListener listener) {
-        this.longClickListener = listener;
-    }
-
     public TransactionAdapter(Context context, RealmResults<Transaction> transactions) {
         this.context = context;
         this.transactions = transactions;
@@ -59,7 +56,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     @Override
     public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
         Transaction cuttentTransaction = transactions.get(position);
-        holder.binding.transactionAmount.setText(String.valueOf(cuttentTransaction.getAmount()));
+        DecimalFormat df = new DecimalFormat("#");
+        holder.binding.transactionAmount.setText(String.valueOf(df.format(cuttentTransaction.getAmount())));
         holder.binding.accountLbl.setText(cuttentTransaction.getAccount());
 
         holder.binding.transactionDate.setText(Helper.formatDate(cuttentTransaction.getDate()));
