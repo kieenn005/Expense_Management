@@ -42,13 +42,11 @@ public class StatsFragment extends Fragment {
     public MainViewModel viewModel;
 
     public StatsFragment() {
-        // Required empty public constructor
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         binding = FragmentStatsBinding.inflate(inflater);
 
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);

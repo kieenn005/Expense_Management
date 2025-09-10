@@ -85,22 +85,17 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                // Sử dụng AlertDialog.Builder để tạo đối thoại
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
-                // Cấu hình các tham số cho AlertDialog
                 builder.setTitle("Delete Transaction")
                         .setMessage("Are you sure to delete this transaction?")
                         .setPositiveButton("YES", (dialogInterface, i) -> {
-                            // Xử lý khi nhấn YES
                             ((MainActivity)context).viewModel.deleteTransaction(cuttentTransaction);
                         })
                         .setNegativeButton("NO", (dialog, i) -> {
-                            // Đóng dialog khi nhấn NO
                             dialog.dismiss();
                         });
 
-                // Tạo và hiển thị AlertDialog
                 AlertDialog deleteDialog = builder.create();
                 deleteDialog.show();
 
@@ -114,7 +109,6 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 //
 //        if (editButton != null) {
 //            editButton.setOnClickListener(v -> {
-//                // Thực hiện hành động khi nhấn vào nút edit
 //            });
 //        } else {
 //            Log.e("TransactionAdapter", "Button Edit is null at position " + position);

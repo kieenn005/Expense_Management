@@ -62,12 +62,10 @@ public class MainActivity extends AppCompatActivity {
         Locale locale = new Locale(langCode);
         Locale.setDefault(locale);
 
-        // Cập nhật cấu hình ngôn ngữ
         android.content.res.Configuration config = new android.content.res.Configuration();
         config.setLocale(locale);
         getResources().updateConfiguration(config, getResources().getDisplayMetrics());
 
-        // Nếu cần thay đổi text trong các view khác sau khi thay đổi ngôn ngữ, bạn có thể gọi lại phương thức cập nhật các view này tại đây.
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,14 +190,11 @@ public class MainActivity extends AppCompatActivity {
     public void exportExcel(Context context) {
         Realm realm = Realm.getDefaultInstance();
         try {
-            // Lấy tất cả các đối tượng Transaction từ Realm
             RealmResults<Transaction> transactions = realm.where(Transaction.class).findAll();
 
-            // Tạo một workbook Excel mới
             Workbook workbook = new XSSFWorkbook();
             Sheet sheet = workbook.createSheet("Transactions");
 
-            // Tạo header row
             Row headerRow = sheet.createRow(0);
             headerRow.createCell(0).setCellValue("ID");
             headerRow.createCell(1).setCellValue("Type");
@@ -209,7 +204,6 @@ public class MainActivity extends AppCompatActivity {
             headerRow.createCell(5).setCellValue("Date");
             headerRow.createCell(6).setCellValue("Amount");
 
-            // Duyệt qua tất cả các transaction và tạo các dòng dữ liệu
             int rowNum = 1;
             for (Transaction transaction : transactions) {
                 Row row = sheet.createRow(rowNum++);
@@ -222,20 +216,18 @@ public class MainActivity extends AppCompatActivity {
                 row.createCell(6).setCellValue(transaction.getAmount());
             }
 
-            // Lưu file trong thư mục ứng dụng
             File file = new File(context.getExternalFilesDir(null), "Transactions.xlsx");
             FileOutputStream fileOut = new FileOutputStream(file);
             workbook.write(fileOut);
             fileOut.close();
 
-            // Thông báo thành công
             Log.d("ExportExcel", "Dữ liệu đã được xuất ra file Excel thành công.");
             Toast.makeText(MainActivity.this, "Dữ liệu đã được xuất ra file Excel thành công.", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             Log.e("ExportExcel", "Lỗi khi xuất dữ liệu ra Excel: " + e.toString());
             Toast.makeText(MainActivity.this, "Lỗi khi xuất dữ liệu ra Excel", Toast.LENGTH_SHORT).show();
         } finally {
-            realm.close(); // Đảm bảo đóng Realm sau khi sử dụng
+            realm.close();
         }
     }
     private void ClearData()
@@ -246,31 +238,22 @@ public class MainActivity extends AppCompatActivity {
 
     public void ImportData(Context context) {
         try {
-            // Đường dẫn đến tệp Excel
             File file = new File(context.getExternalFilesDir(null), "Transactions.xlsx");
 
-            // Kiểm tra nếu tệp tồn tại
             if (file.exists()) {
                 FileInputStream fis = new FileInputStream(file);
 
-                // Tạo workbook từ file
                 Workbook workbook = new XSSFWorkbook(fis);
 
-                // Chọn sheet đầu tiên trong workbook
                 Sheet sheet = workbook.getSheetAt(0);
 
-                // Bắt đầu giao dịch Realm
                 Realm realm = Realm.getDefaultInstance();
                 realm.beginTransaction();
 
-                // Tạo một SimpleDateFormat để phân tích ngày tháng
                 SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
-                // Định dạng ngày tháng
-                // Duyệt qua tất cả các dòng trong sheet
                 for (Row row : sheet) {
-                    if (row.getRowNum() == 0) continue; // Bỏ qua hàng tiêu đề
+                    if (row.getRowNum() == 0) continue;
 
-                    // Lấy dữ liệu từ các ô trong dòng
                     long id = (long) row.getCell(0).getNumericCellValue();
                     String type = row.getCell(1).getStringCellValue();
                     String category = row.getCell(2).getStringCellValue();
@@ -279,25 +262,20 @@ public class MainActivity extends AppCompatActivity {
                     double amount = row.getCell(6).getNumericCellValue();
                     String dateString = row.getCell(5).getStringCellValue();
 
-                    // Chuyển đổi chuỗi ngày thành đối tượng Date
                     Date date = null;
                     try {
-                        date = dateFormat.parse(dateString); // Phân tích chuỗi ngày thành Date
+                        date = dateFormat.parse(dateString);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
 
-                    // Tạo đối tượng Transaction mới
                     Transaction transaction = new Transaction(type, category, account, note, date, amount, id);
 
-                    // Lưu vào Realm
                     realm.insertOrUpdate(transaction);
                 }
 
-                // Cam kết giao dịch
                 realm.commitTransaction();
 
-                // Đóng workbook và file input stream
                 workbook.close();
                 fis.close();
                 realm.close();
