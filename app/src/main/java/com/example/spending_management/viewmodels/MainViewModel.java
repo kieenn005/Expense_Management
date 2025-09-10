@@ -80,14 +80,12 @@ public class MainViewModel extends AndroidViewModel {
                     .findAll();
         }
 
-//        // In số lượng giao dịch để kiểm tra
 //        if (newTransactions != null) {
 //            Log.d("Transactions", "Count: " + newTransactions.size());
 //        } else {
 //            Log.d("Transactions", "No transactions found");
 //        }
 
-        // Cập nhật dữ liệu vào LiveData
         categoriesTransactions.setValue(newTransactions);
     }
 
@@ -135,8 +133,6 @@ public class MainViewModel extends AndroidViewModel {
 
 
         if(Constants.SELECTED_TAB == Constants.DAILY) {
-            // Select * from transactions
-            // Select * from transactions where id = 5
             newTransactions = realm.where(Transaction.class)
                     .greaterThanOrEqualTo("date", calendar.getTime())
                     .lessThan("date", new Date(calendar.getTime().getTime() + (24 * 60 * 60 * 1000)))
@@ -163,13 +159,12 @@ public class MainViewModel extends AndroidViewModel {
                     .doubleValue();
         } else if(Constants.SELECTED_TAB == Constants.MONTHLY) {
             Calendar calendarStart = (Calendar) calendar.clone();
-            calendarStart.set(Calendar.DAY_OF_MONTH, 1); // Đặt ngày là 1
+            calendarStart.set(Calendar.DAY_OF_MONTH, 1);
             Date startTime = calendarStart.getTime();
 
-            // Tính ngày cuối tháng: lấy ngày 1 của tháng tiếp theo, sau đó trừ đi 1 ngày
             calendarStart.add(Calendar.MONTH, 1);
-            calendarStart.set(Calendar.DAY_OF_MONTH, 1); // Đặt ngày là 1 của tháng tiếp theo
-            calendarStart.add(Calendar.DATE, -1); // Lùi lại một ngày để có ngày cuối tháng
+            calendarStart.set(Calendar.DAY_OF_MONTH, 1);
+            calendarStart.add(Calendar.DATE, -1);
             Date endTime = calendarStart.getTime();
 
             newTransactions = realm.where(Transaction.class)
@@ -219,13 +214,13 @@ public class MainViewModel extends AndroidViewModel {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         Calendar calendarStart = (Calendar) calendar.clone();
-        calendarStart.set(Calendar.DAY_OF_MONTH, 1); // Đặt ngày là 1
+        calendarStart.set(Calendar.DAY_OF_MONTH, 1);
         Date startTime = calendarStart.getTime();
 
-        // Tính ngày cuối tháng: lấy ngày 1 của tháng tiếp theo, sau đó trừ đi 1 ngày
+
         calendarStart.add(Calendar.MONTH, 1);
-        calendarStart.set(Calendar.DAY_OF_MONTH, 1); // Đặt ngày là 1 của tháng tiếp theo
-        calendarStart.add(Calendar.DATE, -1); // Lùi lại một ngày để có ngày cuối tháng
+        calendarStart.set(Calendar.DAY_OF_MONTH, 1);
+        calendarStart.add(Calendar.DATE, -1);
         Date endTime = calendarStart.getTime();
 
         newTransactions = realm.where(Transaction.class)
@@ -308,13 +303,13 @@ public class MainViewModel extends AndroidViewModel {
         try {
             realm.beginTransaction();
             RealmResults<Transaction> transactions = realm.where(Transaction.class).findAll();
-            transactions.deleteAllFromRealm(); // Xóa tất cả các đối tượng Transaction
+            transactions.deleteAllFromRealm();
             realm.commitTransaction();
-            getTransactions(calendar); // Cập nhật lại danh sách các transactions (nếu cần)
+            getTransactions(calendar);
         } catch (Exception e) {
             Log.d("Loi", "Lỗi khi xóa tất cả transaction: " + e.toString());
         } finally {
-            realm.close(); // Đảm bảo đóng Realm
+            realm.close();
         }
     }
 }

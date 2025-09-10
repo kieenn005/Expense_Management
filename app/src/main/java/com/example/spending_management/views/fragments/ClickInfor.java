@@ -39,7 +39,6 @@ public class ClickInfor extends BottomSheetDialogFragment {
     Transaction transaction, transactionDelete;
 
     public ClickInfor() {
-        // Required empty public constructor
     }
 
     public ClickInfor(long id)
@@ -55,7 +54,6 @@ public class ClickInfor extends BottomSheetDialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         binding = FragmentClickInforBinding.inflate(inflater);
         transaction = ((MainActivity)getActivity()).viewModel.getTransaction(id, false);
         transactionDelete = ((MainActivity)getActivity()).viewModel.getTransaction(id, true);

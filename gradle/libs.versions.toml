@@ -10,7 +10,7 @@ constraintlayout = "2.2.0"
 poi = "5.2.3"
 poi-ooxml = "5.2.3"
 poi-ooxml-schemas = "4.1.2"
-mediarouter = "1.7.0"
+mediarouter = "1.4.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }

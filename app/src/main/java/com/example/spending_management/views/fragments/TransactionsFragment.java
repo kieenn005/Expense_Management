@@ -38,13 +38,11 @@ public class TransactionsFragment extends Fragment {
     public int beforClickCalendar = 0;
 
     public TransactionsFragment() {
-        // Required empty public constructor
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         binding = FragmentTransactionsBinding.inflate(inflater);
 
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);

@@ -37,7 +37,6 @@ public class AddTransactionFragment extends BottomSheetDialogFragment {
     FragmentAddTransactionBinding binding;
     Transaction transaction;
     public AddTransactionFragment() {
-        // Required empty public constructor
     }
 
     @Override
