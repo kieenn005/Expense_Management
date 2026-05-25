@@ -1,10 +1,12 @@
 package com.example.spending_management.views.activities;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -20,9 +22,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -74,6 +79,7 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int EXPORT_STORAGE_PERMISSION_REQUEST = 1001;
     ActivityMainBinding binding;
     Calendar calendar;
     public MainViewModel viewModel;
@@ -196,6 +202,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void exportExcel(Context context) {
+        if (needsExportStoragePermission()) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    EXPORT_STORAGE_PERMISSION_REQUEST
+            );
+            return;
+        }
+
         Realm realm = Realm.getDefaultInstance();
         try {
             RealmResults<Transaction> transactions = realm.where(Transaction.class).findAll();
@@ -203,13 +218,18 @@ public class MainActivity extends AppCompatActivity {
             String savedPath = saveTransactionsExcel(context, transactions, "Transactions.xlsx");
 
             Log.d("ExportExcel", "Dữ liệu đã được xuất ra file Excel thành công: " + savedPath);
-            Toast.makeText(MainActivity.this, "Dữ liệu đã được xuất ra file Excel thành công.", Toast.LENGTH_SHORT).show();
+            showExportSuccess(savedPath);
         } catch (Throwable e) {
             Log.e("ExportExcel", "Lỗi khi xuất dữ liệu ra Excel: " + e.toString());
             Toast.makeText(MainActivity.this, "Lỗi khi xuất dữ liệu ra Excel", Toast.LENGTH_SHORT).show();
         } finally {
             realm.close();
         }
+    }
+
+    private boolean needsExportStoragePermission() {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED;
     }
 
     private String saveTransactionsExcel(Context context, RealmResults<Transaction> transactions, String fileName) throws IOException {
@@ -221,9 +241,9 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        File directory = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         if (directory == null) {
-            directory = context.getFilesDir();
+            directory = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
         }
         if (!directory.exists() && !directory.mkdirs()) {
             throw new IOException("Cannot create export directory");
@@ -248,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
         ContentValues values = new ContentValues();
         values.put(MediaStore.Downloads.IS_PENDING, 0);
         context.getContentResolver().update(fileUri, values, null, null);
-        return fileUri.toString();
+        return "Downloads/" + fileName;
     }
 
     private Uri createDownloadsFile(Context context, String fileName) throws IOException {
@@ -367,6 +387,16 @@ public class MainActivity extends AppCompatActivity {
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;")
                 .replace("'", "&apos;");
+    }
+
+    private void showExportSuccess(String savedPath) {
+        String message = "File đã lưu tại:\n" + savedPath;
+        Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+        new AlertDialog.Builder(this)
+                .setTitle("Xuất Excel thành công")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show();
     }
 
     public void ClearData()
@@ -603,6 +633,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == EXPORT_STORAGE_PERMISSION_REQUEST) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                exportExcel(this);
+            } else {
+                Toast.makeText(this, "Cần quyền bộ nhớ để lưu file vào Downloads.", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override
