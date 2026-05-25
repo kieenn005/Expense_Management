@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_income">Thu nhập</string>
     <string name="app_expense">Chi tiêu</string>
@@ -9,7 +9,7 @@
     <string name="app_note">Ghi chú</string>
     <string name="app_save">Lưu</string>
     <string name="app_delete">Xóa</string>
-    <string name="app_name">Quản Lý Chi Tiêu</string>
+    <string name="app_name">Expense Management</string>
     <string name="dark_mode">Chế Độ Tối</string>
     <string name="language">Ngôn Ngữ</string>
     <string name="dark_mode_desc">Chuyển đổi giữa giao diện sáng và tối</string>

@@ -1,19 +1,29 @@
 package com.example.spending_management.views.activities;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SearchView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -28,6 +38,8 @@ import com.example.spending_management.views.fragments.AddTransactionFragment;
 import com.example.spending_management.R;
 import com.example.spending_management.databinding.ActivityMainBinding;
 import com.example.spending_management.views.fragments.ClickInfor;
+import com.example.spending_management.views.fragments.ChatbotFragment;
+import com.example.spending_management.views.fragments.MoreFragment;
 import com.example.spending_management.views.fragments.SettingsFragment;
 import com.example.spending_management.views.fragments.StatsFragment;
 import com.example.spending_management.views.fragments.TransactionsFragment;
@@ -52,12 +64,17 @@ import java.util.Locale;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
+import java.io.InputStream;
+import java.io.OutputStream;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 
 public class MainActivity extends AppCompatActivity {
 
     ActivityMainBinding binding;
     Calendar calendar;
     public MainViewModel viewModel;
+    private ActivityResultLauncher<String[]> excelPickerLauncher;
     private void setLocale(String langCode) {
         Locale locale = new Locale(langCode);
         Locale.setDefault(locale);
@@ -70,22 +87,29 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences preferences = getSharedPreferences("settings", MODE_PRIVATE);
+        String currentLanguageCode = preferences.getString("language_code", "vi");
+        setLocale(currentLanguageCode);
+
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
+        excelPickerLauncher = registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
+            if (uri != null) {
+                importExcelFromUri(uri);
+            }
+        });
 
         setSupportActionBar(binding.toolBar);
-        getSupportActionBar().setTitle("Transactions");
+        getSupportActionBar().setTitle(getString(R.string.app_transaction));
 
 
-        Constants.setCategories();
+        Constants.setCategories(this);
         calendar = Calendar.getInstance();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.content, new TransactionsFragment());
         transaction.commit();
-
-        SharedPreferences preferences = getSharedPreferences("settings", MODE_PRIVATE);
 
         int cnt = preferences.getInt("cnt", 1);
 
@@ -93,18 +117,15 @@ public class MainActivity extends AppCompatActivity {
         {
             cnt -= 1;
             boolean isDarkMode = preferences.getBoolean("dark_mode", false);
-            String currentLanguage = preferences.getString("language", "English");
+            String currentLanguage = preferences.getString("language", "Tiếng Việt");
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean("dark_mode", isDarkMode);
             editor.apply();
             AppCompatDelegate.setDefaultNightMode(
                     isDarkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
             );
-            String[] languages = {"English", "Tiếng Việt"};
-            String[] languageCodes = {"en", "vi"}; // Mã ngôn ngữ tương ứng
-            int which = currentLanguage.equals("English") ? 0 : 1;
-            String selectedLanguage = languages[which];
-            String selectedLanguageCode = languageCodes[which];
+            String selectedLanguage = currentLanguage.equals("English") ? "English" : "Tiếng Việt";
+            String selectedLanguageCode = currentLanguage.equals("English") ? "en" : "vi";
             // Lưu ngôn ngữ đã chọn vào SharedPreferences
             editor.putString("language", selectedLanguage);
             editor.putString("language_code", selectedLanguageCode);
@@ -115,78 +136,62 @@ public class MainActivity extends AppCompatActivity {
             Log.d("Long", "chay bao lan");
         }
 
+        binding.mainAddButton.setOnClickListener(view -> showAddTransaction());
+        binding.aiBubble.setOnClickListener(view -> openChatbot());
+
         binding.bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 Log.d("An vao tab", "Yes" + item.toString());
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                if(item.getItemId() == R.id.transaction){
-                    getSupportFragmentManager().popBackStack();
-
-                }else if (item.getItemId() == R.id.stats){
-                    transaction.replace(R.id.content, new StatsFragment());
-                    transaction.addToBackStack(null);
-                } else if (item.getItemId() == R.id.settings){
-                    transaction.replace(R.id.content, new SettingsFragment());
-                    transaction.addToBackStack(null);
-                }
-                else if (item.getItemId() == R.id.more)
-                {
-                    showMoreMenu();
-                }
-                transaction.commit();
-                return true;
+                return handleBottomNavigation(item);
             }
         });
         binding.bottomNavigationView.setOnItemReselectedListener(new NavigationBarView.OnItemReselectedListener() {
             @Override
             public void onNavigationItemReselected(@NonNull MenuItem item) {
                 Log.d("An lai tab", "Yes" + item.toString());
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                if(item.getItemId() == R.id.transaction){
-                    getSupportFragmentManager().popBackStack();
-
-                }else if (item.getItemId() == R.id.stats){
-                    transaction.replace(R.id.content, new StatsFragment());
-                    transaction.addToBackStack(null);
-                } else if (item.getItemId() == R.id.settings){
-                    transaction.replace(R.id.content, new SettingsFragment());
-                    transaction.addToBackStack(null);
-                }
-                else if (item.getItemId() == R.id.more)
-                {
-                    showMoreMenu();
-                }
-                transaction.commit();
+                handleBottomNavigation(item);
             }
         });
     }
 
-    private void showMoreMenu(){
-        PopupMenu popupMenu = new PopupMenu(this, findViewById(R.id.more));
-
-        popupMenu.getMenuInflater().inflate(R.menu.more_menu, popupMenu.getMenu());
-
-        popupMenu.setOnMenuItemClickListener(menuItem -> {
-            if (menuItem.getItemId() == R.id.export_excel) {
-                exportExcel(MainActivity.this);
-                return true;
-            }
-            else if (menuItem.getItemId() == R.id.clear)
-            {
-                ClearData();
-                return true;
-            }
-            else if (menuItem.getItemId() == R.id.import_excel)
-            {
-                ImportData(MainActivity.this);
-                return true;
-            }
+    private boolean handleBottomNavigation(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.transaction) {
+            switchMainFragment(new TransactionsFragment());
+            return true;
+        } else if (item.getItemId() == R.id.stats) {
+            switchMainFragment(new StatsFragment());
+            return true;
+        } else if (item.getItemId() == R.id.settings) {
+            switchMainFragment(new SettingsFragment());
+            return true;
+        } else if (item.getItemId() == R.id.add_transaction) {
+            showAddTransaction();
             return false;
-        });
-
-        popupMenu.show();
+        } else if (item.getItemId() == R.id.more) {
+            switchMainFragment(new MoreFragment());
+            return true;
+        }
+        return false;
     }
+
+    private void switchMainFragment(Fragment fragment) {
+        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.content, fragment)
+                .commit();
+        binding.aiBubble.setVisibility(fragment instanceof ChatbotFragment ? View.GONE : View.VISIBLE);
+    }
+
+    private void showAddTransaction() {
+        new AddTransactionFragment().show(getSupportFragmentManager(), null);
+    }
+
+    public void openChatbot() {
+        switchMainFragment(new ChatbotFragment());
+    }
+
     public void exportExcel(Context context) {
         Realm realm = Realm.getDefaultInstance();
         try {
@@ -196,28 +201,31 @@ public class MainActivity extends AppCompatActivity {
             Sheet sheet = workbook.createSheet("Transactions");
 
             Row headerRow = sheet.createRow(0);
-            headerRow.createCell(0).setCellValue("ID");
-            headerRow.createCell(1).setCellValue("Type");
-            headerRow.createCell(2).setCellValue("Category");
-            headerRow.createCell(3).setCellValue("Account");
-            headerRow.createCell(4).setCellValue("Note");
-            headerRow.createCell(5).setCellValue("Date");
-            headerRow.createCell(6).setCellValue("Amount");
+            headerRow.createCell(0).setCellValue("Mã");
+            headerRow.createCell(1).setCellValue("Loại");
+            headerRow.createCell(2).setCellValue("Danh mục");
+            headerRow.createCell(3).setCellValue("Tài khoản");
+            headerRow.createCell(4).setCellValue("Ghi chú");
+            headerRow.createCell(5).setCellValue("Ngày");
+            headerRow.createCell(6).setCellValue("Số tiền");
 
             int rowNum = 1;
             for (Transaction transaction : transactions) {
                 Row row = sheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(transaction.getId());
-                row.createCell(1).setCellValue(transaction.getType());
+                row.createCell(0).setCellValue(String.valueOf(transaction.getId()));
+                row.createCell(1).setCellValue(typeDisplayName(transaction.getType()));
                 row.createCell(2).setCellValue(transaction.getCategory());
-                row.createCell(3).setCellValue(transaction.getAccount());
+                row.createCell(3).setCellValue(accountDisplayName(transaction.getAccount()));
                 row.createCell(4).setCellValue(transaction.getNote());
-                row.createCell(5).setCellValue(transaction.getDate().toString());
+                row.createCell(5).setCellValue(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(transaction.getDate()));
                 row.createCell(6).setCellValue(transaction.getAmount());
             }
 
-            File file = new File(context.getExternalFilesDir(null), "Transactions.xlsx");
-            FileOutputStream fileOut = new FileOutputStream(file);
+            Uri fileUri = createDownloadsFile(context, "Transactions.xlsx");
+            OutputStream fileOut = context.getContentResolver().openOutputStream(fileUri);
+            if (fileOut == null) {
+                throw new IOException("Cannot open output stream");
+            }
             workbook.write(fileOut);
             fileOut.close();
 
@@ -230,7 +238,21 @@ public class MainActivity extends AppCompatActivity {
             realm.close();
         }
     }
-    private void ClearData()
+
+    private Uri createDownloadsFile(Context context, String fileName) throws IOException {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
+        values.put(MediaStore.Downloads.MIME_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+
+        Uri uri = context.getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+        if (uri == null) {
+            throw new IOException("Cannot create Downloads file");
+        }
+        return uri;
+    }
+
+    public void ClearData()
     {
         viewModel.deleteAllTransactions();
         Toast.makeText(MainActivity.this, "Xóa dữ liệu thành công!", Toast.LENGTH_SHORT).show();
@@ -238,11 +260,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void ImportData(Context context) {
         try {
-            File file = new File(context.getExternalFilesDir(null), "Transactions.xlsx");
+            InputStream fis = openExcelInputStream(context);
 
-            if (file.exists()) {
-                FileInputStream fis = new FileInputStream(file);
-
+            if (fis != null) {
                 Workbook workbook = new XSSFWorkbook(fis);
 
                 Sheet sheet = workbook.getSheetAt(0);
@@ -250,24 +270,19 @@ public class MainActivity extends AppCompatActivity {
                 Realm realm = Realm.getDefaultInstance();
                 realm.beginTransaction();
 
-                SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+                DataFormatter formatter = new DataFormatter();
                 for (Row row : sheet) {
                     if (row.getRowNum() == 0) continue;
 
-                    long id = (long) row.getCell(0).getNumericCellValue();
-                    String type = row.getCell(1).getStringCellValue();
-                    String category = row.getCell(2).getStringCellValue();
-                    String account = row.getCell(3).getStringCellValue();
-                    String note = row.getCell(4).getStringCellValue();
+                    long id = readLong(row.getCell(0), formatter);
+                    String type = typeStorageValue(formatter.formatCellValue(row.getCell(1)));
+                    String category = formatter.formatCellValue(row.getCell(2));
+                    String account = accountStorageValue(formatter.formatCellValue(row.getCell(3)));
+                    String note = formatter.formatCellValue(row.getCell(4));
                     double amount = row.getCell(6).getNumericCellValue();
-                    String dateString = row.getCell(5).getStringCellValue();
+                    String dateString = formatter.formatCellValue(row.getCell(5));
 
-                    Date date = null;
-                    try {
-                        date = dateFormat.parse(dateString);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    Date date = parseExcelDate(dateString);
 
                     Transaction transaction = new Transaction(type, category, account, note, date, amount, id);
 
@@ -293,6 +308,145 @@ public class MainActivity extends AppCompatActivity {
             Log.d("Excel Import", "Lỗi khi đọc tệp Excel: " + e.getMessage());
         }
     }
+
+    public void pickExcelFile() {
+        excelPickerLauncher.launch(new String[]{
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "application/vnd.ms-excel",
+                "application/octet-stream"
+        });
+    }
+
+    private void importExcelFromUri(Uri uri) {
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(uri);
+            if (inputStream == null) {
+                Toast.makeText(this, "Không mở được file Excel.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            importTransactionsFromExcel(inputStream);
+        } catch (IOException e) {
+            Log.d("Excel Import", "Cannot read selected file: " + e.getMessage());
+            Toast.makeText(this, "Không đọc được file Excel.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void importTransactionsFromExcel(InputStream inputStream) throws IOException {
+        Workbook workbook = new XSSFWorkbook(inputStream);
+        Sheet sheet = workbook.getSheetAt(0);
+        Realm realm = Realm.getDefaultInstance();
+
+        try {
+            realm.beginTransaction();
+            DataFormatter formatter = new DataFormatter();
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) continue;
+
+                long id = readLong(row.getCell(0), formatter);
+                String type = typeStorageValue(formatter.formatCellValue(row.getCell(1)));
+                String category = formatter.formatCellValue(row.getCell(2));
+                String account = accountStorageValue(formatter.formatCellValue(row.getCell(3)));
+                String note = formatter.formatCellValue(row.getCell(4));
+                double amount = row.getCell(6).getNumericCellValue();
+                String dateString = formatter.formatCellValue(row.getCell(5));
+                Date date = parseExcelDate(dateString);
+
+                Transaction transaction = new Transaction(type, category, account, note, date, amount, id);
+                realm.insertOrUpdate(transaction);
+            }
+            realm.commitTransaction();
+            viewModel.getTransactions(calendar);
+            Toast.makeText(MainActivity.this, "Đã nhập dữ liệu từ file Excel.", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            if (realm.isInTransaction()) {
+                realm.cancelTransaction();
+            }
+            throw e;
+        } finally {
+            workbook.close();
+            inputStream.close();
+            realm.close();
+        }
+    }
+
+    private InputStream openExcelInputStream(Context context) throws IOException {
+        ContentResolver resolver = context.getContentResolver();
+        Uri downloadsUri = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+        String[] projection = {MediaStore.Downloads._ID};
+        String selection = MediaStore.Downloads.DISPLAY_NAME + "=?";
+        String[] selectionArgs = {"Transactions.xlsx"};
+        String sortOrder = MediaStore.Downloads.DATE_MODIFIED + " DESC";
+
+        try (Cursor cursor = resolver.query(downloadsUri, projection, selection, selectionArgs, sortOrder)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Downloads._ID));
+                Uri fileUri = Uri.withAppendedPath(downloadsUri, String.valueOf(id));
+                return resolver.openInputStream(fileUri);
+            }
+        }
+
+        File appFile = new File(context.getExternalFilesDir(null), "Transactions.xlsx");
+        if (appFile.exists()) {
+            return new FileInputStream(appFile);
+        }
+        return null;
+    }
+
+    private long readLong(Cell cell, DataFormatter formatter) {
+        if (cell == null) return System.currentTimeMillis();
+        String text = formatter.formatCellValue(cell).replace(".", "").replace(",", "").trim();
+        try {
+            return Long.parseLong(text);
+        } catch (NumberFormatException ignored) {
+            try {
+                return (long) cell.getNumericCellValue();
+            } catch (Exception ignoredAgain) {
+                return System.currentTimeMillis();
+            }
+        }
+    }
+
+    private Date parseExcelDate(String dateString) {
+        String[] patterns = {"dd/MM/yyyy", "EEE MMM dd HH:mm:ss z yyyy"};
+        for (String pattern : patterns) {
+            try {
+                Locale locale = pattern.startsWith("EEE") ? Locale.ENGLISH : Locale.getDefault();
+                return new SimpleDateFormat(pattern, locale).parse(dateString);
+            } catch (Exception ignored) {
+            }
+        }
+        return new Date();
+    }
+
+    private String typeDisplayName(String type) {
+        if (Constants.INCOME.equals(type)) return "Thu nhập";
+        if (Constants.EXPENSE.equals(type)) return "Chi tiêu";
+        return type;
+    }
+
+    private String typeStorageValue(String type) {
+        if ("Thu nhập".equalsIgnoreCase(type) || Constants.INCOME.equalsIgnoreCase(type)) return Constants.INCOME;
+        if ("Chi tiêu".equalsIgnoreCase(type) || Constants.EXPENSE.equalsIgnoreCase(type)) return Constants.EXPENSE;
+        return type;
+    }
+
+    private String accountDisplayName(String accountValue) {
+        if ("Cash".equals(accountValue)) return "Tiền mặt";
+        if ("Bank".equals(accountValue)) return "Ngân hàng";
+        if ("Pay pal".equals(accountValue)) return "PayPal";
+        if ("Viettel Money".equals(accountValue)) return "Viettel Money";
+        if ("Other".equals(accountValue)) return "Khác";
+        return accountValue;
+    }
+
+    private String accountStorageValue(String accountValue) {
+        if ("Tiền mặt".equalsIgnoreCase(accountValue) || "Cash".equalsIgnoreCase(accountValue)) return "Cash";
+        if ("Ngân hàng".equalsIgnoreCase(accountValue) || "Bank".equalsIgnoreCase(accountValue)) return "Bank";
+        if ("PayPal".equalsIgnoreCase(accountValue) || "Pay pal".equalsIgnoreCase(accountValue)) return "Pay pal";
+        if ("Khác".equalsIgnoreCase(accountValue) || "Other".equalsIgnoreCase(accountValue)) return "Other";
+        return accountValue;
+    }
+
     public void getTransactions() {
         viewModel.getTransactions(calendar);
     }
@@ -303,6 +457,34 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.top_menu,menu);
         searchItem = menu.findItem(R.id.search);
         thongBao = menu.findItem(R.id.thongBao);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setQueryHint("Tìm giao dịch...");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                viewModel.searchTransactions(calendar, query);
+                searchView.clearFocus();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                viewModel.searchTransactions(calendar, newText);
+                return true;
+            }
+        });
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                viewModel.getTransactions(calendar);
+                return true;
+            }
+        });
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -310,7 +492,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item == searchItem)
         {
-            Toast.makeText(this, "Vui lòng đăng ký Vip để tìm kiếm!", Toast.LENGTH_SHORT).show();
+            return true;
         }
         else if (item == thongBao)
         {
@@ -330,10 +512,7 @@ public class MainActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean("checker", false);
             editor.apply();
-            FragmentTransaction transactionss = getSupportFragmentManager().beginTransaction();
-            transactionss.replace(R.id.content, new SettingsFragment());
-            transactionss.addToBackStack(null);
-            transactionss.commit();
+            switchMainFragment(new SettingsFragment());
             Log.d("Select tab 3", "Done");
         }
     }

@@ -1,12 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.Spending_Management" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@color/surfaceCard</item>
+        <item name="android:navigationBarColor">@color/surfaceCard</item>
+        <item name="colorPrimary">@color/primaryBlue</item>
+        <item name="colorSecondary">@color/orange</item>
+        <item name="colorSurface">@color/surfaceCard</item>
+        <item name="android:windowBackground">@color/screenBackground</item>
     </style>
 
     <style name="Theme.Spending_Management" parent="Base.Theme.Spending_Management" />
     <style name="App.CustomIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
-        <item name="android:color">@color/orangeDark</item>
+        <item name="android:color">@color/surfaceMuted</item>
     </style>
 </resources>

@@ -3,17 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginStart="14dp"
+    android:layout_marginTop="7dp"
+    android:layout_marginEnd="14dp"
+    android:layout_marginBottom="7dp"
+    android:background="@drawable/transaction_card_bg"
+    android:elevation="3dp"
+    android:minHeight="74dp"
+    android:padding="12dp">
 
     <ImageView
         android:id="@+id/categoryIcon"
-        android:layout_width="50sp"
-        android:layout_height="50sp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/category_bg"
-        android:padding="4sp"
-        android:tint="#EFFFFFFF"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:background="@drawable/icon_tile_bg"
+        android:padding="10dp"
+        android:tint="@color/primaryBlueDark"
         app:layout_constraintBottom_toBottomOf="@+id/linearLayout3"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -23,21 +29,22 @@
         android:id="@+id/linearLayout3"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="12dp"
         android:orientation="vertical"
+        app:layout_constraintEnd_toStartOf="@+id/transactionAmount"
         app:layout_constraintStart_toEndOf="@+id/categoryIcon"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="@+id/categoryIcon"
+        app:layout_constraintBottom_toBottomOf="@+id/categoryIcon">
 
         <TextView
             android:id="@+id/transactionCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif"
-            android:padding="4sp"
+            android:padding="0dp"
             android:text="Business"
-            android:textColor="#0D0C0C"
-            android:textSize="18sp"
+            android:textColor="@color/textPrimary"
+            android:textSize="15sp"
             android:textStyle="bold" />
 
         <LinearLayout
@@ -48,19 +55,19 @@
 
             <TextView
                 android:id="@+id/accountLbl"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/account_bg"
-                android:padding="4sp"
+                android:background="@android:color/transparent"
+                android:padding="0dp"
                 android:paddingLeft="5dp"
                 android:paddingTop="2dp"
                 android:textStyle="bold"
-                android:textColor="@color/white"
+                android:textColor="@color/textSecondary"
                 android:paddingRight="5dp"
                 android:paddingBottom="2dp"
                 android:text="Cash"
-                android:textSize="15sp" />
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/transactionDate"
@@ -68,9 +75,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5sp"
                 android:layout_weight="1"
-                android:padding="4sp"
+                android:padding="0dp"
                 android:text="27 November 2024"
-                android:textSize="14sp" />
+                android:textColor="@color/textSecondary"
+                android:textSize="12sp" />
         </LinearLayout>
 
     </LinearLayout>
@@ -79,11 +87,10 @@
         android:id="@+id/transactionAmount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
         android:fontFamily="sans-serif"
         android:text="1000"
-        android:textColor="#101010"
-        android:textSize="14sp"
+        android:textColor="@color/textPrimary"
+        android:textSize="15sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/linearLayout3"
         app:layout_constraintEnd_toEndOf="parent"

@@ -23,6 +23,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Spending_Management"
+rootProject.name = "Expense_Management"
 include(":app")
  

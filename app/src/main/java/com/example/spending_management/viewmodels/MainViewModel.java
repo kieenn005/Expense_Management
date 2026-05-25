@@ -18,6 +18,8 @@ import java.util.Date;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
+import io.realm.Case;
+import io.realm.Sort;
 
 public class MainViewModel extends AndroidViewModel {
 
@@ -64,7 +66,8 @@ public class MainViewModel extends AndroidViewModel {
                     .greaterThanOrEqualTo("date", calendar.getTime())
                     .lessThan("date", new Date(calendar.getTime().getTime() + (24 * 60 * 60 * 1000)))
                     .equalTo("type", type)
-                    .findAll();
+                    .findAll()
+                    .sort("id", Sort.DESCENDING);
         } else if (Constants.SELECTED_TAB_STATS == Constants.MONTHLY) {
             Calendar startCalendar = (Calendar) calendar.clone();
             startCalendar.set(Calendar.DAY_OF_MONTH, 1);
@@ -77,7 +80,8 @@ public class MainViewModel extends AndroidViewModel {
                     .greaterThanOrEqualTo("date", startTime)
                     .lessThan("date", endTime)
                     .equalTo("type", type)
-                    .findAll();
+                    .findAll()
+                    .sort("id", Sort.DESCENDING);
         }
 
 //        if (newTransactions != null) {
@@ -108,7 +112,8 @@ public class MainViewModel extends AndroidViewModel {
             newTransactions = realm.where(Transaction.class)
                     .greaterThanOrEqualTo("date", calendar.getTime())
                     .lessThan("date", new Date(calendar.getTime().getTime() + (24 * 60 * 60 * 1000)))
-                    .findAll();
+                    .findAll()
+                    .sort("id", Sort.DESCENDING);
 
             income = realm.where(Transaction.class)
                     .greaterThanOrEqualTo("date", calendar.getTime())
@@ -136,7 +141,8 @@ public class MainViewModel extends AndroidViewModel {
             newTransactions = realm.where(Transaction.class)
                     .greaterThanOrEqualTo("date", calendar.getTime())
                     .lessThan("date", new Date(calendar.getTime().getTime() + (24 * 60 * 60 * 1000)))
-                    .findAll();
+                    .findAll()
+                    .sort("id", Sort.DESCENDING);
 
             income = realm.where(Transaction.class)
                     .greaterThanOrEqualTo("date", calendar.getTime())
@@ -170,7 +176,8 @@ public class MainViewModel extends AndroidViewModel {
             newTransactions = realm.where(Transaction.class)
                     .greaterThanOrEqualTo("date", startTime)
                     .lessThan("date", endTime)
-                    .findAll();
+                    .findAll()
+                    .sort("id", Sort.DESCENDING);
 
             income = realm.where(Transaction.class)
                     .greaterThanOrEqualTo("date", startTime)
@@ -197,11 +204,76 @@ public class MainViewModel extends AndroidViewModel {
         totalExpense.setValue(expense);
         totalAmount.setValue(total);
         transactions.setValue(newTransactions);
-        newTransactions = realm.where(Transaction.class)
-                .equalTo("date", calendar.getTime())
-                .findAll();
 
     }
+
+    public void searchTransactions(Calendar calendar, String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            getTransactions(calendar);
+            return;
+        }
+
+        Calendar searchCalendar = (Calendar) calendar.clone();
+        searchCalendar.set(Calendar.HOUR_OF_DAY, 0);
+        searchCalendar.set(Calendar.MINUTE, 0);
+        searchCalendar.set(Calendar.SECOND, 0);
+        searchCalendar.set(Calendar.MILLISECOND, 0);
+
+        Date startTime;
+        Date endTime;
+        if (Constants.SELECTED_TAB == Constants.MONTHLY) {
+            Calendar startCalendar = (Calendar) searchCalendar.clone();
+            startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+            startTime = startCalendar.getTime();
+            startCalendar.add(Calendar.MONTH, 1);
+            endTime = startCalendar.getTime();
+        } else {
+            startTime = searchCalendar.getTime();
+            endTime = new Date(searchCalendar.getTime().getTime() + (24 * 60 * 60 * 1000));
+        }
+
+        String text = keyword.trim();
+        String normalized = normalizeSearchText(text);
+        RealmResults<Transaction> newTransactions = realm.where(Transaction.class)
+                .greaterThanOrEqualTo("date", startTime)
+                .lessThan("date", endTime)
+                .beginGroup()
+                .contains("category", text, Case.INSENSITIVE)
+                .or()
+                .contains("account", text, Case.INSENSITIVE)
+                .or()
+                .contains("note", text, Case.INSENSITIVE)
+                .or()
+                .contains("type", text, Case.INSENSITIVE)
+                .or()
+                .contains("account", accountSearchValue(normalized), Case.INSENSITIVE)
+                .or()
+                .contains("type", typeSearchValue(normalized), Case.INSENSITIVE)
+                .endGroup()
+                .findAll()
+                .sort("id", Sort.DESCENDING);
+
+        transactions.setValue(newTransactions);
+    }
+
+    private String normalizeSearchText(String value) {
+        String text = java.text.Normalizer.normalize(value.toLowerCase(), java.text.Normalizer.Form.NFD);
+        return text.replaceAll("\\p{InCombiningDiacriticalMarks}+", "").replace("đ", "d");
+    }
+
+    private String accountSearchValue(String normalized) {
+        if (normalized.contains("tien mat") || normalized.contains("cash")) return "Cash";
+        if (normalized.contains("ngan hang") || normalized.contains("bank")) return "Bank";
+        if (normalized.contains("khac") || normalized.contains("other")) return "Other";
+        return normalized;
+    }
+
+    private String typeSearchValue(String normalized) {
+        if (normalized.contains("thu nhap") || normalized.equals("thu")) return Constants.INCOME;
+        if (normalized.contains("chi tieu") || normalized.contains("tieu") || normalized.equals("chi")) return Constants.EXPENSE;
+        return normalized;
+    }
+
     public void LoadMonthly(Calendar calendar)
     {
         this.calendar = calendar;
@@ -226,7 +298,8 @@ public class MainViewModel extends AndroidViewModel {
         newTransactions = realm.where(Transaction.class)
                 .greaterThanOrEqualTo("date", startTime)
                 .lessThan("date", endTime)
-                .findAll();
+                .findAll()
+                .sort("id", Sort.DESCENDING);
 
         income = realm.where(Transaction.class)
                 .greaterThanOrEqualTo("date", startTime)
@@ -252,9 +325,6 @@ public class MainViewModel extends AndroidViewModel {
         totalExpense.setValue(expense);
         totalAmount.setValue(total);
         transactions.setValue(newTransactions);
-        newTransactions = realm.where(Transaction.class)
-                .equalTo("date", calendar.getTime())
-                .findAll();
     }
 
     public void addTransaction(Transaction transaction) {

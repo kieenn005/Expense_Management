@@ -58,7 +58,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         Transaction cuttentTransaction = transactions.get(position);
         DecimalFormat df = new DecimalFormat("#");
         holder.binding.transactionAmount.setText(String.valueOf(df.format(cuttentTransaction.getAmount())));
-        holder.binding.accountLbl.setText(cuttentTransaction.getAccount());
+        holder.binding.accountLbl.setText(accountDisplayName(cuttentTransaction.getAccount()));
 
         holder.binding.transactionDate.setText(Helper.formatDate(cuttentTransaction.getDate()));
         holder.binding.transactionCategory.setText(cuttentTransaction.getCategory());
@@ -67,6 +67,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
         holder.binding.categoryIcon.setImageResource(transactionCategory.getCategory_image());
         holder.binding.categoryIcon.setBackgroundTintList(context.getColorStateList(transactionCategory.getCategory_color()));
+        holder.binding.categoryIcon.setColorFilter(context.getColor(R.color.white));
 
         holder.binding.accountLbl.setBackgroundTintList(context.getColorStateList(Constants.getAccountColor(cuttentTransaction.getAccount())));
 
@@ -117,6 +118,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         int categoryImage = transactionCategory.getCategory_image();
         if (categoryImage != 0) {
             holder.binding.categoryIcon.setImageResource(categoryImage);
+            holder.binding.categoryIcon.setColorFilter(context.getColor(R.color.white));
         } else {
             Log.e("TransactionAdapter", "Invalid category image resource ID.");
         }
@@ -147,6 +149,14 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public void deleteTransaction(Transaction transaction) {
         transactions.remove(transaction);
         notifyDataSetChanged();
+    }
+
+    private String accountDisplayName(String accountValue) {
+        if ("Cash".equals(accountValue)) return "Tiền mặt";
+        if ("Bank".equals(accountValue)) return "Ngân hàng";
+        if ("Pay pal".equals(accountValue)) return "PayPal";
+        if ("Other".equals(accountValue)) return "Khác";
+        return accountValue;
     }
 
 }

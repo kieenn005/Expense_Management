@@ -2,23 +2,34 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="orangeDark">#0A3981</color>
-    <color name="orange">#FF5722</color>
-    <color name="greenColor">#4CAF50</color>
-    <color name="redColor">#EF1B0B</color>
-    <color name="textColor">#EFEBEB</color>
+    <color name="screenBackground">#F8FAFC</color>
+    <color name="surfaceCard">#FFFFFF</color>
+    <color name="surfaceMuted">#F1F5F9</color>
+    <color name="primaryBlue">#8EC5F8</color>
+    <color name="primaryBlueDark">#5AA3F0</color>
+    <color name="categoryIconBlue">#5AA3F0</color>
+    <color name="aquaColor">#84E4EC</color>
+    <color name="orangeDark">#FF8A2A</color>
+    <color name="orange">#FF8A2A</color>
+    <color name="addButtonColor">#A9D6FF</color>
+    <color name="addButtonIcon">#26313F</color>
+    <color name="greenColor">#4CCB78</color>
+    <color name="redColor">#FF5B62</color>
+    <color name="textColor">#9AA5B1</color>
+    <color name="textPrimary">#363C45</color>
+    <color name="textSecondary">#8A96A3</color>
 
-    <color name="category1">#2196F3</color>
-    <color name="category2">#00BCD4</color>
-    <color name="category3">#8B6EBC</color>
-    <color name="category4">#A02B53</color>
-    <color name="category5">#D7AE32</color>
-    <color name="category6">#60E966</color>
+    <color name="category1">#8EC5F8</color>
+    <color name="category2">#84E4EC</color>
+    <color name="category3">#5AA3F0</color>
+    <color name="category4">#FF5B62</color>
+    <color name="category5">#FFD166</color>
+    <color name="category6">#4CCB78</color>
 
-    <color name="Cash">#60E966</color>
-    <color name="Bank">#A880EF</color>
-    <color name="MB_Bank">#0B7CD5</color>
-    <color name="Viettel_Money">#E74B80</color>
-    <color name="Other">#DE8A6F</color>
+    <color name="Cash">#4CCB78</color>
+    <color name="Bank">#8EC5F8</color>
+    <color name="MB_Bank">#5AA3F0</color>
+    <color name="Viettel_Money">#84E4EC</color>
+    <color name="Other">#FF8A2A</color>
 
 </resources>
