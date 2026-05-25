@@ -10,7 +10,13 @@ Quét QR bên dưới để tải trực tiếp file APK:
 | --- |
 | ![QR tải APK](images/qr_code.png) |
 
-Link tải trực tiếp: [Expense_Management.apk](https://github.com/kieenn005/Expense_Management/raw/main/release/Expense_Management.apk)
+* **Link tải trực tiếp:** [Expense_Management.apk](https://github.com/kieenn005/Expense_Management/raw/main/release/Expense_Management.apk)
+* **Link tải dự phòng (CDN):** [Expense_Management.apk (Direct Raw)](https://raw.githubusercontent.com/kieenn005/Expense_Management/main/release/Expense_Management.apk)
+
+> [!NOTE]
+> **Lưu ý cho Android:**
+> - Nếu quét mã QR bằng ứng dụng quét QR mặc định hoặc ứng dụng nhắn tin (Zalo, Viber,...) mà không tải được file, hãy **sao chép liên kết** và dán vào trình duyệt web (như **Google Chrome** hoặc **Samsung Internet**) để tải về.
+> - Sau khi tải xong, nếu hệ thống cảnh báo "Tệp có thể gây hại" hoặc "Nguồn không xác định", hãy chọn **Vẫn tải xuống** (Download anyway) hoặc **Cho phép cài đặt từ nguồn này** (Allow from this source) để tiến hành cài đặt.
 
 ## Tính năng chính
 
