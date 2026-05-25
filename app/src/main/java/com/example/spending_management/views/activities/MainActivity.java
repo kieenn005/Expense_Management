@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -221,17 +222,12 @@ public class MainActivity extends AppCompatActivity {
                 row.createCell(6).setCellValue(transaction.getAmount());
             }
 
-            Uri fileUri = createDownloadsFile(context, "Transactions.xlsx");
-            OutputStream fileOut = context.getContentResolver().openOutputStream(fileUri);
-            if (fileOut == null) {
-                throw new IOException("Cannot open output stream");
-            }
-            workbook.write(fileOut);
-            fileOut.close();
+            String savedPath = saveWorkbook(context, workbook, "Transactions.xlsx");
+            workbook.close();
 
-            Log.d("ExportExcel", "Dữ liệu đã được xuất ra file Excel thành công.");
+            Log.d("ExportExcel", "Dữ liệu đã được xuất ra file Excel thành công: " + savedPath);
             Toast.makeText(MainActivity.this, "Dữ liệu đã được xuất ra file Excel thành công.", Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e("ExportExcel", "Lỗi khi xuất dữ liệu ra Excel: " + e.toString());
             Toast.makeText(MainActivity.this, "Lỗi khi xuất dữ liệu ra Excel", Toast.LENGTH_SHORT).show();
         } finally {
@@ -239,11 +235,53 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private String saveWorkbook(Context context, Workbook workbook, String fileName) throws IOException {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            try {
+                return saveWorkbookToMediaStore(context, workbook, fileName);
+            } catch (Exception e) {
+                Log.w("ExportExcel", "Cannot save to Downloads, using app folder instead: " + e.toString());
+            }
+        }
+
+        File directory = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        if (directory == null) {
+            directory = context.getFilesDir();
+        }
+        if (!directory.exists() && !directory.mkdirs()) {
+            throw new IOException("Cannot create export directory");
+        }
+
+        File file = new File(directory, fileName);
+        try (OutputStream fileOut = new FileOutputStream(file)) {
+            workbook.write(fileOut);
+        }
+        return file.getAbsolutePath();
+    }
+
+    private String saveWorkbookToMediaStore(Context context, Workbook workbook, String fileName) throws IOException {
+        Uri fileUri = createDownloadsFile(context, fileName);
+        try (OutputStream fileOut = context.getContentResolver().openOutputStream(fileUri)) {
+            if (fileOut == null) {
+                throw new IOException("Cannot open output stream");
+            }
+            workbook.write(fileOut);
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Downloads.IS_PENDING, 0);
+        context.getContentResolver().update(fileUri, values, null, null);
+        return fileUri.toString();
+    }
+
     private Uri createDownloadsFile(Context context, String fileName) throws IOException {
         ContentValues values = new ContentValues();
         values.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
         values.put(MediaStore.Downloads.MIME_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            values.put(MediaStore.Downloads.IS_PENDING, 1);
+        }
 
         Uri uri = context.getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
         if (uri == null) {
