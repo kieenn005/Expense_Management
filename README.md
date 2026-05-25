@@ -10,7 +10,7 @@ Quét QR bên dưới để tải trực tiếp file APK:
 | --- |
 | ![QR tải APK](images/qr_code.png) |
 
-Link tải trực tiếp: [Expense_Management.apk](https://github.com/tuananhwtpq/Spending_Management/raw/main/release/Expense_Management.apk)
+Link tải trực tiếp: [Expense_Management.apk](https://github.com/kieenn005/Expense_Management/raw/main/release/Expense_Management.apk)
 
 ## Tính năng chính
 
@@ -56,7 +56,7 @@ Khi xuất Excel, file `Transactions.xlsx` được lưu vào thư mục Downloa
 1. Clone repository:
 
 ```bash
-git clone https://github.com/tuananhwtpq/Spending_Management.git
+git clone https://github.com/kieenn005/Expense_Management.git
 ```
 
 2. Mở thư mục dự án bằng Android Studio.
