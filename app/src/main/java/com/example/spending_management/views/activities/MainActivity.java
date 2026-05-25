@@ -61,6 +61,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 import io.realm.Realm;
@@ -198,36 +200,11 @@ public class MainActivity extends AppCompatActivity {
         try {
             RealmResults<Transaction> transactions = realm.where(Transaction.class).findAll();
 
-            Workbook workbook = new XSSFWorkbook();
-            Sheet sheet = workbook.createSheet("Transactions");
-
-            Row headerRow = sheet.createRow(0);
-            headerRow.createCell(0).setCellValue("Mã");
-            headerRow.createCell(1).setCellValue("Loại");
-            headerRow.createCell(2).setCellValue("Danh mục");
-            headerRow.createCell(3).setCellValue("Tài khoản");
-            headerRow.createCell(4).setCellValue("Ghi chú");
-            headerRow.createCell(5).setCellValue("Ngày");
-            headerRow.createCell(6).setCellValue("Số tiền");
-
-            int rowNum = 1;
-            for (Transaction transaction : transactions) {
-                Row row = sheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(String.valueOf(transaction.getId()));
-                row.createCell(1).setCellValue(typeDisplayName(transaction.getType()));
-                row.createCell(2).setCellValue(transaction.getCategory());
-                row.createCell(3).setCellValue(accountDisplayName(transaction.getAccount()));
-                row.createCell(4).setCellValue(transaction.getNote());
-                row.createCell(5).setCellValue(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(transaction.getDate()));
-                row.createCell(6).setCellValue(transaction.getAmount());
-            }
-
-            String savedPath = saveWorkbook(context, workbook, "Transactions.xlsx");
-            workbook.close();
+            String savedPath = saveTransactionsExcel(context, transactions, "Transactions.xlsx");
 
             Log.d("ExportExcel", "Dữ liệu đã được xuất ra file Excel thành công: " + savedPath);
             Toast.makeText(MainActivity.this, "Dữ liệu đã được xuất ra file Excel thành công.", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Log.e("ExportExcel", "Lỗi khi xuất dữ liệu ra Excel: " + e.toString());
             Toast.makeText(MainActivity.this, "Lỗi khi xuất dữ liệu ra Excel", Toast.LENGTH_SHORT).show();
         } finally {
@@ -235,10 +212,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private String saveWorkbook(Context context, Workbook workbook, String fileName) throws IOException {
+    private String saveTransactionsExcel(Context context, RealmResults<Transaction> transactions, String fileName) throws IOException {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
-                return saveWorkbookToMediaStore(context, workbook, fileName);
+                return saveTransactionsExcelToMediaStore(context, transactions, fileName);
             } catch (Exception e) {
                 Log.w("ExportExcel", "Cannot save to Downloads, using app folder instead: " + e.toString());
             }
@@ -254,18 +231,18 @@ public class MainActivity extends AppCompatActivity {
 
         File file = new File(directory, fileName);
         try (OutputStream fileOut = new FileOutputStream(file)) {
-            workbook.write(fileOut);
+            writeTransactionsXlsx(fileOut, transactions);
         }
         return file.getAbsolutePath();
     }
 
-    private String saveWorkbookToMediaStore(Context context, Workbook workbook, String fileName) throws IOException {
+    private String saveTransactionsExcelToMediaStore(Context context, RealmResults<Transaction> transactions, String fileName) throws IOException {
         Uri fileUri = createDownloadsFile(context, fileName);
         try (OutputStream fileOut = context.getContentResolver().openOutputStream(fileUri)) {
             if (fileOut == null) {
                 throw new IOException("Cannot open output stream");
             }
-            workbook.write(fileOut);
+            writeTransactionsXlsx(fileOut, transactions);
         }
 
         ContentValues values = new ContentValues();
@@ -288,6 +265,108 @@ public class MainActivity extends AppCompatActivity {
             throw new IOException("Cannot create Downloads file");
         }
         return uri;
+    }
+
+    private void writeTransactionsXlsx(OutputStream outputStream, RealmResults<Transaction> transactions) throws IOException {
+        try (ZipOutputStream zip = new ZipOutputStream(outputStream)) {
+            writeZipEntry(zip, "[Content_Types].xml",
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                            "<Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\">" +
+                            "<Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>" +
+                            "<Default Extension=\"xml\" ContentType=\"application/xml\"/>" +
+                            "<Override PartName=\"/xl/workbook.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml\"/>" +
+                            "<Override PartName=\"/xl/worksheets/sheet1.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>" +
+                            "<Override PartName=\"/xl/styles.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml\"/>" +
+                            "</Types>");
+            writeZipEntry(zip, "_rels/.rels",
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                            "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" +
+                            "<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument\" Target=\"xl/workbook.xml\"/>" +
+                            "</Relationships>");
+            writeZipEntry(zip, "xl/workbook.xml",
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                            "<workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">" +
+                            "<sheets><sheet name=\"Transactions\" sheetId=\"1\" r:id=\"rId1\"/></sheets>" +
+                            "</workbook>");
+            writeZipEntry(zip, "xl/_rels/workbook.xml.rels",
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                            "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" +
+                            "<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/sheet1.xml\"/>" +
+                            "<Relationship Id=\"rId2\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles\" Target=\"styles.xml\"/>" +
+                            "</Relationships>");
+            writeZipEntry(zip, "xl/styles.xml",
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                            "<styleSheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\">" +
+                            "<fonts count=\"1\"><font><sz val=\"11\"/><name val=\"Calibri\"/></font></fonts>" +
+                            "<fills count=\"1\"><fill><patternFill patternType=\"none\"/></fill></fills>" +
+                            "<borders count=\"1\"><border><left/><right/><top/><bottom/><diagonal/></border></borders>" +
+                            "<cellStyleXfs count=\"1\"><xf numFmtId=\"0\" fontId=\"0\" fillId=\"0\" borderId=\"0\"/></cellStyleXfs>" +
+                            "<cellXfs count=\"1\"><xf numFmtId=\"0\" fontId=\"0\" fillId=\"0\" borderId=\"0\" xfId=\"0\"/></cellXfs>" +
+                            "</styleSheet>");
+            writeZipEntry(zip, "xl/worksheets/sheet1.xml", buildTransactionsSheetXml(transactions));
+        }
+    }
+
+    private String buildTransactionsSheetXml(RealmResults<Transaction> transactions) {
+        StringBuilder xml = new StringBuilder();
+        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        xml.append("<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\">");
+        xml.append("<sheetData>");
+        appendTextRow(xml, 1, new String[]{"Mã", "Loại", "Danh mục", "Tài khoản", "Ghi chú", "Ngày", "Số tiền"});
+
+        int rowNumber = 2;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        for (Transaction transaction : transactions) {
+            xml.append("<row r=\"").append(rowNumber).append("\">");
+            appendTextCell(xml, "A", rowNumber, String.valueOf(transaction.getId()));
+            appendTextCell(xml, "B", rowNumber, typeDisplayName(transaction.getType()));
+            appendTextCell(xml, "C", rowNumber, transaction.getCategory());
+            appendTextCell(xml, "D", rowNumber, accountDisplayName(transaction.getAccount()));
+            appendTextCell(xml, "E", rowNumber, transaction.getNote());
+            appendTextCell(xml, "F", rowNumber, dateFormat.format(transaction.getDate()));
+            appendNumberCell(xml, "G", rowNumber, transaction.getAmount());
+            xml.append("</row>");
+            rowNumber++;
+        }
+
+        xml.append("</sheetData>");
+        xml.append("</worksheet>");
+        return xml.toString();
+    }
+
+    private void appendTextRow(StringBuilder xml, int rowNumber, String[] values) {
+        xml.append("<row r=\"").append(rowNumber).append("\">");
+        for (int i = 0; i < values.length; i++) {
+            appendTextCell(xml, String.valueOf((char) ('A' + i)), rowNumber, values[i]);
+        }
+        xml.append("</row>");
+    }
+
+    private void appendTextCell(StringBuilder xml, String column, int rowNumber, String value) {
+        xml.append("<c r=\"").append(column).append(rowNumber).append("\" t=\"inlineStr\"><is><t>");
+        xml.append(escapeXml(value == null ? "" : value));
+        xml.append("</t></is></c>");
+    }
+
+    private void appendNumberCell(StringBuilder xml, String column, int rowNumber, double value) {
+        xml.append("<c r=\"").append(column).append(rowNumber).append("\"><v>");
+        xml.append(value);
+        xml.append("</v></c>");
+    }
+
+    private void writeZipEntry(ZipOutputStream zip, String name, String content) throws IOException {
+        zip.putNextEntry(new ZipEntry(name));
+        zip.write(content.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        zip.closeEntry();
+    }
+
+    private String escapeXml(String value) {
+        return value
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;");
     }
 
     public void ClearData()
