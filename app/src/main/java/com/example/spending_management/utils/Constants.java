@@ -23,10 +23,12 @@ public class Constants {
     private static final String SETTINGS_PREFS = "settings";
     private static final String EXPENSE_CATEGORIES_KEY = "expense_categories";
     private static final String INCOME_CATEGORIES_KEY = "income_categories";
+    private static final String ACCOUNTS_KEY = "accounts";
 
     public static ArrayList<Category> categories;
     public static ArrayList<Category> expenseCategories;
     public static ArrayList<Category> incomeCategories;
+    public static ArrayList<Account> accounts;
 
     public static int DAILY = 0;
     public static int MONTHLY = 1;
@@ -49,6 +51,7 @@ public class Constants {
                 false
         );
         categories = expenseCategories;
+        accounts = buildAccounts(getSavedCategories(preferences, ACCOUNTS_KEY, "Cash|Bank|Pay pal|Viettel Money|Other"));
     }
 
     private static String getSavedCategories(SharedPreferences preferences, String key, String fallback) {
@@ -82,6 +85,21 @@ public class Constants {
         expenseCategories = buildCategories("Mua sắm|Đồ ăn|Điện thoại|Giải trí|Giáo dục|Sức khỏe|Đi lại|Nhà ở|Khác", true);
         incomeCategories = buildCategories("Lương|Khoản đầu tư|Làm thêm|Tiền thưởng|Khác", false);
         categories = expenseCategories;
+        accounts = buildAccounts("Cash|Bank|Pay pal|Viettel Money|Other");
+    }
+
+    private static ArrayList<Account> buildAccounts(String rawAccounts) {
+        ArrayList<Account> result = new ArrayList<>();
+        String[] names = rawAccounts.split("\\|");
+        for (String rawName : names) {
+            String name = rawName.trim();
+            if (name.length() == 0) continue;
+            result.add(new Account(0, name));
+        }
+        if (result.isEmpty()) {
+            result.add(new Account(0, "Cash"));
+        }
+        return result;
     }
 
     private static ArrayList<Category> buildCategories(String rawCategories, boolean expense) {
@@ -129,6 +147,13 @@ public class Constants {
         return INCOME.equals(type) ? incomeCategories : expenseCategories;
     }
 
+    public static ArrayList<Account> getAccounts(android.content.Context context) {
+        if (accounts == null) {
+            setCategories(context);
+        }
+        return accounts;
+    }
+
     public static void saveCategories(android.content.Context context, String type, ArrayList<Category> newCategories) {
         Set<String> savedSet = new HashSet<>();
         StringBuilder legacyBuilder = new StringBuilder();
@@ -144,6 +169,32 @@ public class Constants {
                 .putString((INCOME.equals(type) ? INCOME_CATEGORIES_KEY : EXPENSE_CATEGORIES_KEY) + "_legacy", legacyBuilder.toString())
                 .apply();
         setCategories(context);
+    }
+
+    public static void saveAccounts(android.content.Context context, ArrayList<Account> newAccounts) {
+        Set<String> savedSet = new HashSet<>();
+        StringBuilder legacyBuilder = new StringBuilder();
+        for (int i = 0; i < newAccounts.size(); i++) {
+            String accountName = newAccounts.get(i).getAccount_name();
+            savedSet.add(i + ":" + accountName);
+            if (i > 0) legacyBuilder.append("|");
+            legacyBuilder.append(accountName);
+        }
+        context.getSharedPreferences(SETTINGS_PREFS, android.content.Context.MODE_PRIVATE)
+                .edit()
+                .putStringSet(ACCOUNTS_KEY, savedSet)
+                .putString(ACCOUNTS_KEY + "_legacy", legacyBuilder.toString())
+                .apply();
+        setCategories(context);
+    }
+
+    public static String accountDisplayName(String accountValue) {
+        if ("Cash".equals(accountValue)) return "Tiền mặt";
+        if ("Bank".equals(accountValue)) return "Ngân hàng";
+        if ("Pay pal".equals(accountValue)) return "PayPal";
+        if ("Viettel Money".equals(accountValue)) return "Viettel Money";
+        if ("Other".equals(accountValue)) return "Khác";
+        return accountValue;
     }
 
     public static Category getCategoryDetails(String categoryName) {

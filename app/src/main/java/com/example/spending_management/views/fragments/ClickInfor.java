@@ -126,21 +126,16 @@ public class ClickInfor extends BottomSheetDialogFragment {
             dialogBinding.recyclerView.setAdapter(categoryAdapter);
             categoryDialog.show();
         });
-        binding.account.setText(transaction.getAccount());
+        binding.account.setText(Constants.accountDisplayName(transaction.getAccount()));
         binding.account.setOnClickListener(c-> {
             ListDialogBinding dialogBinding = ListDialogBinding.inflate(inflater);
             AlertDialog accountsDialog = new AlertDialog.Builder(getContext()).create();
             accountsDialog.setView(dialogBinding.getRoot());
-            ArrayList<Account> accounts = new ArrayList<>();
-            accounts.add(new Account(0, "Cash"));
-            accounts.add(new Account(0, "Bank"));
-            accounts.add(new Account(0, "PayTM"));
-            accounts.add(new Account(0, "EasyPaisa"));
-            accounts.add(new Account(0, "Other"));
+            ArrayList<Account> accounts = new ArrayList<>(Constants.getAccounts(requireContext()));
             AccountAdapter adapter = new AccountAdapter(getContext(), accounts, new AccountAdapter.AccountClickListener() {
                 @Override
                 public void onAccountSelected(Account account) {
-                    binding.account.setText(account.getAccount_name());
+                    binding.account.setText(Constants.accountDisplayName(account.getAccount_name()));
                     transaction.setAccount(account.getAccount_name());
                     accountsDialog.dismiss();
                 }

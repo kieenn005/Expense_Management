@@ -350,11 +350,7 @@ public class ChatbotFragment extends Fragment {
     }
 
     private String accountDisplay(String account) {
-        if ("Cash".equals(account)) return "Tiền mặt";
-        if ("Bank".equals(account)) return "Ngân hàng";
-        if ("Pay pal".equals(account)) return "PayPal";
-        if ("Other".equals(account)) return "Khác";
-        return account;
+        return Constants.accountDisplayName(account);
     }
 
     private void hideKeyboard() {

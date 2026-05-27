@@ -232,12 +232,7 @@ public class AddTransactionFragment extends BottomSheetDialogFragment {
     }
 
     private void showAccountPicker() {
-        ArrayList<Account> accounts = new ArrayList<>();
-        accounts.add(new Account(0, "Cash"));
-        accounts.add(new Account(0, "Bank"));
-        accounts.add(new Account(0, "Pay pal"));
-        accounts.add(new Account(0, "Viettel Money"));
-        accounts.add(new Account(0, "Other"));
+        ArrayList<Account> accounts = new ArrayList<>(Constants.getAccounts(requireContext()));
 
         String[] accountNames = new String[accounts.size()];
         for (int i = 0; i < accounts.size(); i++) {
@@ -291,11 +286,6 @@ public class AddTransactionFragment extends BottomSheetDialogFragment {
     }
 
     private String accountDisplayName(String accountValue) {
-        if ("Cash".equals(accountValue)) return "Tiền mặt";
-        if ("Bank".equals(accountValue)) return "Ngân hàng";
-        if ("Pay pal".equals(accountValue)) return "PayPal";
-        if ("Viettel Money".equals(accountValue)) return "Viettel Money";
-        if ("Other".equals(accountValue)) return "Khác";
-        return accountValue;
+        return Constants.accountDisplayName(accountValue);
     }
 }

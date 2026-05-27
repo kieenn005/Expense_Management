@@ -8,9 +8,4 @@
         android:title="Tìm kiếm"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="always|collapseActionView" />
-    <item
-        android:id="@+id/thongBao"
-        android:icon="@drawable/ic_star"
-        android:title="Favorite"
-        app:showAsAction="always" />
 </menu>

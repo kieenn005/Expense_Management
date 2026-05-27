@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.spending_management.R;
 import com.example.spending_management.databinding.RowAccountBinding;
 import com.example.spending_management.models.Account;
+import com.example.spending_management.utils.Constants;
 
 import java.util.ArrayList;
 
@@ -39,7 +40,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.Accounts
     @Override
     public void onBindViewHolder(@NonNull AccountsViewHolder holder, int position) {
         Account account = accountArrayList.get(position);
-        holder.binding.accountName.setText(account.getAccount_name());
+        holder.binding.accountName.setText(Constants.accountDisplayName(account.getAccount_name()));
 
 
         holder.itemView.setOnClickListener(c -> {

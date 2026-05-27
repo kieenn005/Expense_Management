@@ -152,11 +152,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     }
 
     private String accountDisplayName(String accountValue) {
-        if ("Cash".equals(accountValue)) return "Tiền mặt";
-        if ("Bank".equals(accountValue)) return "Ngân hàng";
-        if ("Pay pal".equals(accountValue)) return "PayPal";
-        if ("Other".equals(accountValue)) return "Khác";
-        return accountValue;
+        return Constants.accountDisplayName(accountValue);
     }
 
 }

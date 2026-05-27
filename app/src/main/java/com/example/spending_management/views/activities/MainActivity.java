@@ -578,12 +578,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String accountDisplayName(String accountValue) {
-        if ("Cash".equals(accountValue)) return "Tiền mặt";
-        if ("Bank".equals(accountValue)) return "Ngân hàng";
-        if ("Pay pal".equals(accountValue)) return "PayPal";
-        if ("Viettel Money".equals(accountValue)) return "Viettel Money";
-        if ("Other".equals(accountValue)) return "Khác";
-        return accountValue;
+        return Constants.accountDisplayName(accountValue);
     }
 
     private String accountStorageValue(String accountValue) {
@@ -598,12 +593,11 @@ public class MainActivity extends AppCompatActivity {
         viewModel.getTransactions(calendar);
     }
 
-    public MenuItem searchItem, thongBao;
+    public MenuItem searchItem;
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.top_menu,menu);
         searchItem = menu.findItem(R.id.search);
-        thongBao = menu.findItem(R.id.thongBao);
         SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setQueryHint("Tìm giao dịch...");
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -652,10 +646,6 @@ public class MainActivity extends AppCompatActivity {
         if (item == searchItem)
         {
             return true;
-        }
-        else if (item == thongBao)
-        {
-            Toast.makeText(this, "Không có thông báo!", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
     }
